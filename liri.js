@@ -4,8 +4,10 @@ var Spotify = require('node-spotify-api');
 var spotify = new Spotify(keys.spotify);
 var axios = require("axios");
 var fs = require("fs");
+var moment = require("moment");
 var command = process.argv[2];
 var value = process.argv.slice(3);
+
 
 
 switch (command) {
@@ -24,14 +26,24 @@ switch (command) {
 }
 
 function concertThis() {
-    axios.get("https://rest.bandsintown.com/artists/" + value + "/events?app_id=codingbootcamp")
+    var artist = value.join(" ");
+   
+    axios.get("https://rest.bandsintown.com/artists/" + artist + "/events?app_id=codingbootcamp")
         .then(function (response) {
-            console.log(JSON.stringify("bandsintown: " + response.data));
+
+            var show = response.data;
+         
+            for (var i = 0; i < show.length; i++ ){
+                result = show[i];
+                console.log(result.venue.city + ", "+ result.venue.country + ", "+ result.venue.name + ", " + moment(result.venue.dateTime).format("MM/DD/YYYY"));
+            }
+            //console.log(artist+" tour dates and locations:\n",city);
+
+            //moment(response)
         })
         .catch(function (error) {
             if (error.response) {
-                // The request was made and the server responded with a status code
-                // that falls out of the range of 2xx
+             
                 console.log("---------------Data---------------");
                 console.log(error.response.data);
                 console.log("---------------Status---------------");
@@ -39,11 +51,10 @@ function concertThis() {
                 console.log("---------------Status---------------");
                 console.log(error.response.headers);
             } else if (error.request) {
-                // The request was made but no response was received
-                // `error.request` is an object that comes back with details pertaining to the error that occurred.
+             
                 console.log(error.request);
             } else {
-                // Something happened in setting up the request that triggered an Error
+              
                 console.log("Error", error.message);
             }
             console.log(error.config);
@@ -51,7 +62,9 @@ function concertThis() {
 }
 
 function spotifyThis() {
+    
     var song = value.join(" ");
+   
     if (song === "") {
         spotify.search({ type: 'track', query: "The Sign" }, function (err, data) {
             if (err) {
@@ -153,18 +166,14 @@ function movieThis() {
 function doThis() {
     fs.readFile("random.txt", "utf8", function(error, data) {
 
-        // If the code experiences any errors it will log the error to the console.
         if (error) {
           return console.log(error);
         }
       
-        // We will then print the contents of data
-        console.log(data);
+        console.log(JSON.stringify(data));
       
-        // Then split it by commas (to make it more readable)
         // var dataArr = data.split(" ");
       
-        // // We will then re-display the content as an array for later use.
         // console.log(dataArr);
       
       });
